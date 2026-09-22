@@ -1,0 +1,11 @@
+hotkey: F12
+language: de
+model: small
+max_recording_seconds: 60
+auto_paste: true
+use_gpu: false
+temp_dir: "%TEMP%\\stt"
+socket_host: 127.0.0.1
+socket_port: 9901
+beep_on_start: false
+beep_on_end: false
