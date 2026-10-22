@@ -8,6 +8,8 @@ lokal (CUDA oder CPU), aufgenommene Audio-Rohdaten landen nur temporär im
 `%TEMP%` und werden nach der Transkription gelöscht — die Sprache verlässt
 den Rechner zu keinem Zeitpunkt.
 
+<p align="center"><img src="assets/screenshot.png" alt="Wispher-Fenster" width="320"></p>
+
 Wispher ist eine Windows-App mit Tray-Icon und kleinem Fenster. Das Fenster
 zeigt den letzten Text und einen Verlauf — ein Klick kopiert den Text, falls er
 nicht automatisch im Zielfeld gelandet ist.
@@ -50,8 +52,9 @@ Die EXE braucht den Ordner `_internal` und `config.yaml` daneben.
 |---|---|---|
 | `language` | `de` | Whisper-Sprache |
 | `hotkey` | `F12` | Push-to-Talk-Taste |
+| `initial_prompt` | – | Hilft bei Fachbegriffen und englischen Wörtern im Satz |
 | `model` | `small` | faster-whisper-Modellgröße (`tiny` … `large-v3`) |
-| `use_gpu` | `false` | CUDA nutzen, wenn verfügbar |
+| `use_gpu` | `true` | CUDA nutzen, wenn verfügbar |
 | `max_recording_seconds` | `60` | Fail-Safe gegen vergessene F12-Taste |
 | `auto_paste` | `true` | Text per Ctrl+V einfügen (sonst nur Zwischenablage) |
 | `beep_on_start` / `beep_on_end` | `false` | Audio-Feedback bei Aufnahmebeginn/-ende |
@@ -61,7 +64,7 @@ Die EXE braucht den Ordner `_internal` und `config.yaml` daneben.
 - Audio wird ausschließlich als temporäre WAV-Datei in `%TEMP%\stt`
   geschrieben und im `finally`-Block gelöscht — auch bei Fehlern.
 - Transkription läuft vollständig offline über faster-whisper.
-- Keine Telemetrie, keine Updates, keine Netzwerkverbindung.
+- Keine Telemetrie. Nur beim ersten Start lädt faster-whisper das Modell von Hugging Face herunter. Audio und Text verlassen den Rechner nie.
 
 ## Lizenz
 
