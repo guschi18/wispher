@@ -17,22 +17,23 @@ from wispher import APP_DIR, Config, HotkeyServer, log
 
 RES = Path(getattr(sys, "_MEIPASS", APP_DIR))  # gebündelte Dateien (assets/)
 BG, CARD, CARD_HOVER = "#1b1511", "#2a2019", "#37291f"
-TEXT, MUTED, ACCENT, ACCENT_TEXT = "#f6ece1", "#a3917f", "#ff8a4c", "#2a1608"
+TEXT, MUTED, ACCENT, ACCENT_HOVER, ACCENT_TEXT = "#f6ece1", "#a3917f", "#ff8a4c", "#ffa070", "#2a1608"
+BORDER = "#43301f"
 W = 392  # Kartenbreite
+BTN_W, BTN_H = 150, 46  # runder Kopieren-Button
 STATES = {  # state -> (Statustext, Punktfarbe)
     "loading": ("Modell lädt …", "#8a7b6e"),
     "ready": ("Bereit – F12 halten zum Sprechen", "#8fd694"),
     "recording": ("Nimmt auf …", "#ff5a4d"),
     "transcribing": ("Transkribiere …", "#ffc24d"),
 }
-HISTORY_MAX = 6  # 1 großer + 5 im Verlauf
 
 
-def rounded(w, h, r, fill):
+def rounded(w, h, r, fill, outline=None):
     """Anti-aliased Rundrechteck (4x supersampled) als Tk-Bild."""
     k = 4
     im = Image.new("RGBA", (w * k, h * k), (0, 0, 0, 0))
-    ImageDraw.Draw(im).rounded_rectangle((0, 0, w * k - 1, h * k - 1), r * k, fill=fill)
+    ImageDraw.Draw(im).rounded_rectangle((0, 0, w * k - 1, h * k - 1), r * k, fill=fill, outline=outline, width=k)
     return ImageTk.PhotoImage(im.resize((w, h), Image.LANCZOS))
 
 
@@ -41,7 +42,7 @@ FONT_FILES = {  # Geist (OFL) + Instrument Serif liegen in assets/fonts; sonst S
     "serif": "InstrumentSerif-Regular.ttf",
 }
 _fonts: dict = {}
-K = 4  # Supersampling-Faktor für glatten Text
+K = 1  # 1 = native FreeType-Hinting (schärfer als Supersampling)
 
 
 def font(kind: str, px: int) -> ImageFont.FreeTypeFont:
@@ -107,16 +108,20 @@ class Surface(tk.Canvas):
 
 
 class Card(Surface):
-    """Klickbare Karte mit runden Ecken und Hover-Effekt."""
+    """Karte mit runden Ecken und dünnem Rand, Höhe per fit() variabel."""
 
-    def __init__(self, parent, h, r, on_click):
-        super().__init__(parent, W, h, cursor="hand2")
-        self._normal, self._hover = rounded(W, h, r, CARD), rounded(W, h, r, CARD_HOVER)
-        self._bg = self.create_image(0, 0, anchor="nw", image=self._normal)
+    def __init__(self, parent, h, r):
+        super().__init__(parent, W, h)
+        self.r = r
+        self._bg = self.create_image(0, 0, anchor="nw")
         self.tag_lower(self._bg)
-        self.bind("<Enter>", lambda _e: self.itemconfig(self._bg, image=self._hover))
-        self.bind("<Leave>", lambda _e: self.itemconfig(self._bg, image=self._normal))
-        self.bind("<Button-1>", lambda _e: on_click())
+        self.fit(h)
+
+    def fit(self, h):
+        """Kartenhöhe an den Inhalt anpassen."""
+        self.config(height=h)
+        self._img = rounded(W, h, self.r, CARD, BORDER)
+        self.itemconfig(self._bg, image=self._img)
 
 
 def label(parent, text, kind, size, color, w=W, h=None) -> Surface:
@@ -134,7 +139,6 @@ class App:
         self.root = tk.Tk()
         self.root.title("Wispher")
         self.root.configure(bg=BG)
-        self.root.geometry("432x640")
         self.root.resizable(False, False)
         self.root.iconbitmap(str(RES / "assets" / "icon.ico"))
         self.root.protocol("WM_DELETE_WINDOW", self.root.withdraw)  # X = in den Tray
@@ -171,18 +175,18 @@ class App:
         self.dot = self.status.create_image(1, 5, anchor="nw")
         self.status_text = self.status.add_text(18, 1, "", "regular", 13, MUTED)
 
-        label(r, "LETZTER TEXT", "semibold", 11, MUTED).pack(anchor="w", padx=22, pady=(24, 6))
-        self.main = Card(r, 214, 22, lambda: self._copy(self.history[0] if self.history else ""))
-        self.main.pack(padx=20)
-        self.body = self.main.add_text(20, 20, "Halte F12 und sprich – der Text erscheint hier.", "regular", 16, MUTED,
-                                       width=W - 40, max_lines=6)
-        self._chip_img = rounded(112, 32, 16, ACCENT)
-        self.main.create_image(W - 20, 214 - 18, anchor="se", image=self._chip_img)
-        self.chip = self.main.add_text(W - 20 - 56, 214 - 18 - 16, "Kopieren", "semibold", 14, ACCENT_TEXT, anchor="center")
-
-        label(r, "VERLAUF", "semibold", 11, MUTED).pack(anchor="w", padx=22, pady=(22, 6))
-        self.list_frame = tk.Frame(r, bg=BG)
-        self.list_frame.pack(fill="x", padx=20)
+        label(r, "LETZTER TEXT", "semibold", 11, MUTED).pack(anchor="w", padx=22, pady=(24, 8))
+        self.main = Card(r, 160, 30)
+        self.main.pack(padx=20, pady=(0, 22))
+        self.body = self.main.add_text(24, 22, "", "regular", 16, MUTED, width=W - 48, max_lines=8)
+        self._btn_img, self._btn_hover = rounded(BTN_W, BTN_H, BTN_H // 2, ACCENT), rounded(BTN_W, BTN_H, BTN_H // 2, ACCENT_HOVER)
+        self.btn = self.main.create_image(W // 2, 0, anchor="n", image=self._btn_img)
+        self.chip = self.main.add_text(W // 2, 0, "Kopieren", "semibold", 15, ACCENT_TEXT, anchor="center")
+        for item in (self.btn, self.chip):
+            self.main.tag_bind(item, "<Button-1>", lambda _e: self._copy(self.history[0] if self.history else ""))
+            self.main.tag_bind(item, "<Enter>", lambda _e: (self.main.itemconfig(self.btn, image=self._btn_hover), self.main.config(cursor="hand2")))
+            self.main.tag_bind(item, "<Leave>", lambda _e: (self.main.itemconfig(self.btn, image=self._btn_img), self.main.config(cursor="")))
+        self._show_text("Halte F12 und sprich – der Text erscheint hier.", MUTED)
         self._set_status("loading")
 
     def _set_status(self, state: str):
@@ -207,16 +211,18 @@ class App:
         self.main.set_text(self.chip, "Kopiert")
         self.root.after(1500, lambda: self.main.set_text(self.chip, "Kopieren"))
 
+    def _show_text(self, text: str, color=TEXT):
+        """Text setzen; Karte wächst mit, Button sitzt immer mittig unter dem Text."""
+        self.main.set_text(self.body, text, color)
+        th = self.main._t[self.body]["img"].height()
+        y = 22 + th + 20
+        self.main.fit(y + BTN_H + 24)
+        self.main.coords(self.btn, W // 2, y)
+        self.main.coords(self.chip, W // 2, y + BTN_H // 2)
+
     def _add_text(self, text: str):
-        self.history.insert(0, text)
-        del self.history[HISTORY_MAX:]
-        self.main.set_text(self.body, text, TEXT)
-        for w in self.list_frame.winfo_children():
-            w.destroy()
-        for t in self.history[1:]:
-            row = Card(self.list_frame, 44, 14, lambda t=t: self._copy(t))
-            row.add_text(16, 22, t, "regular", 14, TEXT, width=W - 32, max_lines=1, anchor="w")
-            row.pack(pady=3)
+        self.history = [text]
+        self._show_text(text)
 
     # --- Engine (Thread) -> GUI (Tk-Thread) über Queue ---
     def _load_engine(self):
