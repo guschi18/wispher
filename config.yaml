@@ -1,11 +1,13 @@
 hotkey: F12
 language: de
-model: small
+model: large-v3
 max_recording_seconds: 60
 auto_paste: true
-use_gpu: false
+use_gpu: true
 temp_dir: "%TEMP%\\stt"
 socket_host: 127.0.0.1
 socket_port: 9901
 beep_on_start: false
 beep_on_end: false
+# Hilft bei Fachbegriffen und englischen Wörtern mitten im deutschen Satz
+initial_prompt: "Das ist ein deutscher Text mit englischen Begriffen wie Claude Code, GitHub, Prompt, Deployment, Docker und Python."

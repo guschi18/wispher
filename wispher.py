@@ -22,19 +22,33 @@ import pyperclip
 import yaml
 from faster_whisper import WhisperModel
 
+# Als EXE (--noconsole) gibt es kein stdout -> Log in Datei neben der EXE/dem Skript
+APP_DIR = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
+    handlers=[
+        logging.StreamHandler(sys.stdout) if sys.stdout else logging.FileHandler(APP_DIR / "wispher.log", encoding="utf-8")
+    ],
 )
 log = logging.getLogger("wispher")
+
+# pip-installierte CUDA-DLLs (nvidia-*-cu12) liegen nicht im Suchpfad
+try:
+    import nvidia
+    for _p in nvidia.__path__:
+        for _bin in Path(_p).glob("*/bin"):
+            os.add_dll_directory(str(_bin))
+            os.environ["PATH"] = str(_bin) + os.pathsep + os.environ["PATH"]
+except ImportError:
+    pass
 
 
 class Config:
     def __init__(self, path: str = "config.yaml"):
         config_path = Path(path)
         if not config_path.is_absolute():
-            config_path = Path(__file__).parent / path
+            config_path = APP_DIR / path
         with open(config_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
@@ -47,6 +61,8 @@ class Config:
         self.socket_port: int = int(data.get("socket_port", 9901))
         self.beep_on_start: bool = data.get("beep_on_start", False)
         self.beep_on_end: bool = data.get("beep_on_end", False)
+        self.hotkey: str = str(data.get("hotkey", "F12"))
+        self.initial_prompt: str | None = data.get("initial_prompt") or None
 
         raw_temp = data.get("temp_dir", "%TEMP%\\stt")
         self.temp_dir: Path = Path(os.path.expandvars(raw_temp))
@@ -62,12 +78,12 @@ class STTEngine:
             self.model = WhisperModel(config.model, device=device, compute_type=compute)
             # Verify GPU works with a tiny encode to catch missing DLL errors early
             if device == "cuda":
-                import numpy as np
-                self.model.feature_extractor(np.zeros(16000, dtype=np.float32))
+                list(self.model.transcribe(np.zeros(16000, dtype=np.float32))[0])
         except Exception as e:
             log.warning("GPU init failed (%s), falling back to CPU.", e)
             self.model = WhisperModel(config.model, device="cpu", compute_type="int8")
         self.language = config.language
+        self.initial_prompt = config.initial_prompt
         log.info("Whisper model ready.")
 
     def transcribe(self, wav_path: Path) -> str:
@@ -76,6 +92,8 @@ class STTEngine:
             language=self.language,
             beam_size=5,
             vad_filter=True,
+            initial_prompt=self.initial_prompt,
+            condition_on_previous_text=False,
         )
         return " ".join(seg.text for seg in segments)
 
@@ -181,6 +199,9 @@ class HotkeyServer:
         self.config = config
         self.recorder = AudioRecorder(config)
         self.stt = STTEngine(config)
+        # Hooks für die GUI: on_state("recording"|"transcribing"|"ready"), on_text(text)
+        self.on_state = lambda state: None
+        self.on_text = lambda text: None
         self._fail_safe_timer: threading.Timer | None = None
         # Alle START/STOP-Befehle laufen serialisiert über diese Queue
         self._cmd_queue: queue.Queue[str] = queue.Queue()
@@ -209,6 +230,7 @@ class HotkeyServer:
         if self._fail_safe_timer:
             self._fail_safe_timer.cancel()
         self.recorder.start()
+        self.on_state("recording")
         self._fail_safe_timer = threading.Timer(
             self.config.max_recording_seconds, self._fail_safe
         )
@@ -223,8 +245,10 @@ class HotkeyServer:
         wav_path = self.recorder.stop()
         if wav_path is None:
             log.info("No audio captured, skipping transcription.")
+            self.on_state("ready")
             return
 
+        self.on_state("transcribing")
         try:
             text = self.stt.transcribe(wav_path)
             text = TextProcessor.clean(text)
@@ -232,9 +256,11 @@ class HotkeyServer:
                 log.info("Empty transcription, nothing to inject.")
                 return
             log.info("Transcribed: %r", text)
+            self.on_text(text)
             if self.config.auto_paste:
                 TextInjector.inject(text)
         finally:
+            self.on_state("ready")
             try:
                 wav_path.unlink()
             except OSError:
@@ -263,6 +289,25 @@ class HotkeyServer:
             log.error("Error handling client %s: %s", addr, e)
         finally:
             conn.close()
+
+    def start_hotkey(self):
+        """F12 halten = aufnehmen, loslassen = transkribieren (ersetzt wispher.ahk)."""
+        import keyboard
+        held = False
+
+        def down(_):
+            nonlocal held
+            if not held:  # Auto-Repeat beim Halten ignorieren
+                held = True
+                self._cmd_queue.put("START")
+
+        def up(_):
+            nonlocal held
+            held = False
+            self._cmd_queue.put("STOP")
+
+        keyboard.on_press_key(self.config.hotkey, down, suppress=True)
+        keyboard.on_release_key(self.config.hotkey, up, suppress=True)
 
     def run(self):
         host = self.config.socket_host

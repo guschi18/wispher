@@ -19,3 +19,10 @@ Thumbs.db
 
 # Secrets
 .env
+
+# Build
+build/
+dist/
+*.spec
+*.log
+graft/
