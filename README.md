@@ -66,6 +66,10 @@ Die EXE braucht den Ordner `_internal` und `config.yaml` daneben.
 - Transkription läuft vollständig offline über faster-whisper.
 - Keine Telemetrie. Nur beim ersten Start lädt faster-whisper das Modell von Hugging Face herunter. Audio und Text verlassen den Rechner nie.
 
+## Schriften
+
+[Geist](https://github.com/vercel/geist-font) (Vercel) und [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif) (Google Fonts), beide unter der SIL Open Font License. Die Schriftdateien liegen in `assets/fonts/` und sind in die EXE gebündelt. Lizenztext: `assets/fonts/OFL-Geist.txt`.
+
 ## Lizenz
 
 MIT — siehe [LICENSE](LICENSE).

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pyperclip
 import pystray
-from PIL import Image, ImageDraw, ImageTk
+from PIL import Image, ImageDraw, ImageFont, ImageTk
 
 import wispher
 from wispher import APP_DIR, Config, HotkeyServer, log
@@ -18,7 +18,6 @@ from wispher import APP_DIR, Config, HotkeyServer, log
 RES = Path(getattr(sys, "_MEIPASS", APP_DIR))  # gebündelte Dateien (assets/)
 BG, CARD, CARD_HOVER = "#1b1511", "#2a2019", "#37291f"
 TEXT, MUTED, ACCENT, ACCENT_TEXT = "#f6ece1", "#a3917f", "#ff8a4c", "#2a1608"
-FONT = "Segoe UI Variable Display"
 W = 392  # Kartenbreite
 STATES = {  # state -> (Statustext, Punktfarbe)
     "loading": ("Modell lädt …", "#8a7b6e"),
@@ -37,20 +36,93 @@ def rounded(w, h, r, fill):
     return ImageTk.PhotoImage(im.resize((w, h), Image.LANCZOS))
 
 
-class Card(tk.Canvas):
+FONT_FILES = {  # Geist (OFL) + Instrument Serif liegen in assets/fonts; sonst Segoe UI als Fallback
+    "regular": "Geist-Regular.ttf", "medium": "Geist-Medium.ttf", "semibold": "Geist-SemiBold.ttf",
+    "serif": "InstrumentSerif-Regular.ttf",
+}
+_fonts: dict = {}
+K = 4  # Supersampling-Faktor für glatten Text
+
+
+def font(kind: str, px: int) -> ImageFont.FreeTypeFont:
+    if (kind, px) not in _fonts:
+        for path in (RES / "assets" / "fonts" / FONT_FILES[kind], Path("C:/Windows/Fonts/SegUIVar.ttf")):
+            try:
+                _fonts[kind, px] = ImageFont.truetype(str(path), px)
+                break
+            except OSError:
+                continue
+        else:
+            _fonts[kind, px] = ImageFont.load_default(px)
+    return _fonts[kind, px]
+
+
+def render_text(text, kind, size, color, width=None, max_lines=None) -> ImageTk.PhotoImage:
+    """Text mit Pillow in 4-facher Auflösung zeichnen und glatt herunterskalieren (statt Tk-Text)."""
+    f = font(kind, size * K)
+    lines, limit = [], (width or 10**6) * K
+    for para in text.split("\n"):
+        cur = ""
+        for word in para.split(" "):
+            test = f"{cur} {word}".strip()
+            if cur and f.getlength(test) > limit:
+                lines.append(cur)
+                cur = word
+            else:
+                cur = test
+        lines.append(cur)
+    if max_lines and len(lines) > max_lines:
+        lines = lines[:max_lines]
+        while lines[-1] and f.getlength(lines[-1] + "…") > limit:
+            lines[-1] = lines[-1][:-1]
+        lines[-1] = lines[-1].rstrip() + "…"
+    asc, desc = f.getmetrics()
+    lh = int((asc + desc) * 1.3)
+    w = int(max(f.getlength(l) for l in lines)) + 2 * K
+    im = Image.new("RGBA", (w, lh * len(lines) + 2 * K), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    for n, line in enumerate(lines):
+        d.text((K, K + n * lh), line, font=f, fill=color)
+    return ImageTk.PhotoImage(im.resize((im.width // K, im.height // K), Image.LANCZOS))
+
+
+class Surface(tk.Canvas):
+    """Canvas mit scharfem Pillow-Text; add_text/set_text statt create_text."""
+
+    def __init__(self, parent, w, h, **kw):
+        super().__init__(parent, width=w, height=h, bg=BG, highlightthickness=0, **kw)
+        self._t: dict = {}
+
+    def add_text(self, x, y, text, kind, size, color, width=None, max_lines=None, anchor="nw") -> int:
+        item = self.create_image(x, y, anchor=anchor)
+        self._t[item] = dict(kind=kind, size=size, color=color, width=width, max_lines=max_lines)
+        self.set_text(item, text)
+        return item
+
+    def set_text(self, item, text, color=None):
+        p = self._t[item]
+        p["color"] = color or p["color"]
+        p["img"] = render_text(text, p["kind"], p["size"], p["color"], p["width"], p["max_lines"])
+        self.itemconfig(item, image=p["img"])
+
+
+class Card(Surface):
     """Klickbare Karte mit runden Ecken und Hover-Effekt."""
 
     def __init__(self, parent, h, r, on_click):
-        super().__init__(parent, width=W, height=h, bg=BG, highlightthickness=0, cursor="hand2")
+        super().__init__(parent, W, h, cursor="hand2")
         self._normal, self._hover = rounded(W, h, r, CARD), rounded(W, h, r, CARD_HOVER)
         self._bg = self.create_image(0, 0, anchor="nw", image=self._normal)
+        self.tag_lower(self._bg)
         self.bind("<Enter>", lambda _e: self.itemconfig(self._bg, image=self._hover))
         self.bind("<Leave>", lambda _e: self.itemconfig(self._bg, image=self._normal))
         self.bind("<Button-1>", lambda _e: on_click())
 
 
-def clip(text: str, n: int) -> str:
-    return text if len(text) <= n else text[: n - 1] + "…"
+def label(parent, text, kind, size, color, w=W, h=None) -> Surface:
+    s = Surface(parent, w, h or int(size * 1.5))
+    s.add_text(0, 0, text, kind, size, color)
+    return s
 
 
 class App:
@@ -93,31 +165,34 @@ class App:
         tk.Label(head, image=self.logo, bg=BG).pack(side="left")
         col = tk.Frame(head, bg=BG)
         col.pack(side="left", padx=12)
-        tk.Label(col, text="Wispher", bg=BG, fg=TEXT, font=(FONT, 17, "bold")).pack(anchor="w")
-        self.status = tk.Canvas(col, width=300, height=18, bg=BG, highlightthickness=0)
+        label(col, "Wispher", "serif", 34, TEXT, 300, 44).pack(anchor="w")
+        self.status = Surface(col, 300, 20)
         self.status.pack(anchor="w")
-        self.dot = self.status.create_oval(1, 5, 11, 15, fill=MUTED, outline="")
-        self.status_text = self.status.create_text(19, 10, anchor="w", fill=MUTED, font=(FONT, 10))
+        self.dot = self.status.create_image(1, 5, anchor="nw")
+        self.status_text = self.status.add_text(18, 1, "", "regular", 13, MUTED)
 
-        tk.Label(r, text="LETZTER TEXT", bg=BG, fg=MUTED, font=(FONT, 8, "bold")).pack(anchor="w", padx=22, pady=(24, 6))
+        label(r, "LETZTER TEXT", "semibold", 11, MUTED).pack(anchor="w", padx=22, pady=(24, 6))
         self.main = Card(r, 214, 22, lambda: self._copy(self.history[0] if self.history else ""))
         self.main.pack(padx=20)
-        self.body = self.main.create_text(20, 20, anchor="nw", width=W - 40, fill=MUTED, font=(FONT, 12),
-                                          text="Halte F12 und sprich – der Text erscheint hier.")
+        self.body = self.main.add_text(20, 20, "Halte F12 und sprich – der Text erscheint hier.", "regular", 16, MUTED,
+                                       width=W - 40, max_lines=6)
         self._chip_img = rounded(112, 32, 16, ACCENT)
         self.main.create_image(W - 20, 214 - 18, anchor="se", image=self._chip_img)
-        self.chip = self.main.create_text(W - 20 - 56, 214 - 18 - 16, fill=ACCENT_TEXT, font=(FONT, 10, "bold"), text="Kopieren")
+        self.chip = self.main.add_text(W - 20 - 56, 214 - 18 - 16, "Kopieren", "semibold", 14, ACCENT_TEXT, anchor="center")
 
-        tk.Label(r, text="VERLAUF", bg=BG, fg=MUTED, font=(FONT, 8, "bold")).pack(anchor="w", padx=22, pady=(22, 6))
+        label(r, "VERLAUF", "semibold", 11, MUTED).pack(anchor="w", padx=22, pady=(22, 6))
         self.list_frame = tk.Frame(r, bg=BG)
         self.list_frame.pack(fill="x", padx=20)
-        self.status.itemconfig(self.status_text, text=STATES["loading"][0])
-        self.status.itemconfig(self.dot, fill=STATES["loading"][1])
+        self._set_status("loading")
+
+    def _set_status(self, state: str):
+        text, color = STATES[state]
+        self.status.set_text(self.status_text, text)
+        self._dot_img = rounded(10, 10, 5, color)
+        self.status.itemconfig(self.dot, image=self._dot_img)
 
     def _set_state(self, state: str):
-        text, color = STATES[state]
-        self.status.itemconfig(self.status_text, text=text)
-        self.status.itemconfig(self.dot, fill=color)
+        self._set_status(state)
         self.tray.icon = self._tray_image(state)
 
     def _tray_image(self, state: str) -> Image.Image:
@@ -129,18 +204,18 @@ class App:
         if not text:
             return
         pyperclip.copy(text)
-        self.main.itemconfig(self.chip, text="Kopiert ✓")
-        self.root.after(1500, lambda: self.main.itemconfig(self.chip, text="Kopieren"))
+        self.main.set_text(self.chip, "Kopiert")
+        self.root.after(1500, lambda: self.main.set_text(self.chip, "Kopieren"))
 
     def _add_text(self, text: str):
         self.history.insert(0, text)
         del self.history[HISTORY_MAX:]
-        self.main.itemconfig(self.body, text=clip(text, 260), fill=TEXT)
+        self.main.set_text(self.body, text, TEXT)
         for w in self.list_frame.winfo_children():
             w.destroy()
         for t in self.history[1:]:
             row = Card(self.list_frame, 44, 14, lambda t=t: self._copy(t))
-            row.create_text(16, 22, anchor="w", width=W - 32, fill=TEXT, font=(FONT, 10), text=clip(t, 58))
+            row.add_text(16, 22, t, "regular", 14, TEXT, width=W - 32, max_lines=1, anchor="w")
             row.pack(pady=3)
 
     # --- Engine (Thread) -> GUI (Tk-Thread) über Queue ---
@@ -165,7 +240,7 @@ class App:
             elif kind == "text":
                 self._add_text(val)
             elif kind == "fatal":
-                self.status.itemconfig(self.status_text, text=f"Fehler: {clip(val, 40)}")
+                self.status.set_text(self.status_text, f"Fehler: {val[:40]}")
         self.root.after(100, self._poll)
 
     def _show(self, *_):
