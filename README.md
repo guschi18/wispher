@@ -1,5 +1,22 @@
 <p align="center"><img src="assets/banner.svg" alt="Wispher — F12 halten, sprechen, loslassen" width="900"></p>
 
+<p align="center">
+<img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white" alt="Windows 10 | 11">
+<img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10+">
+<img src="https://img.shields.io/badge/faster--whisper-large--v3-ff8a4c" alt="faster-whisper large-v3">
+<img src="https://img.shields.io/badge/100%25-offline-8fd694" alt="100 % offline">
+<img src="https://img.shields.io/badge/Telemetrie-keine-8fd694" alt="Keine Telemetrie">
+<a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-MIT-lightgrey" alt="MIT-Lizenz"></a>
+</p>
+
+<p align="center">
+<a href="#schnellstart">Schnellstart</a> ·
+<a href="#warum-wispher">Warum Wispher?</a> ·
+<a href="#konfiguration-configyaml">Konfiguration</a> ·
+<a href="#datenschutz">Datenschutz</a> ·
+<a href="#fehlersuche">Fehlersuche</a>
+</p>
+
 # Wispher — Local Push-to-Talk Speech-to-Text
 
 **F12 halten → sprechen → loslassen → der Text steht im aktiven Feld.**
