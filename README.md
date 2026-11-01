@@ -11,6 +11,7 @@
 
 <p align="center">
 <a href="#schnellstart">Schnellstart</a> ·
+<a href="#so-funktionierts">So funktioniert's</a> ·
 <a href="#warum-wispher">Warum Wispher?</a> ·
 <a href="#konfiguration-configyaml">Konfiguration</a> ·
 <a href="#datenschutz--prüf-es-selbst">Datenschutz</a> ·
@@ -28,22 +29,56 @@ läuft lokal auf GPU (CUDA) oder CPU. Die Audio-Rohdaten liegen nur kurz im
 
 <p align="center"><img src="assets/demo.svg" alt="Animation: F12 halten, sprechen, loslassen, der Text erscheint im Feld" width="900"></p>
 
-## Warum Wispher?
+<details>
+<summary><b>🇬🇧 English in 10 seconds</b></summary>
 
-Du diktierst Prompts, Commit-Messages und Mails und willst dabei nicht die Hände von der Tastatur nehmen. Du willst auch keinen Dienst, der jedes Wort mithört.
+<br>
 
-| | **Wispher** | Windows-Diktat (`Win`+`H`) | Cloud-Diktierdienste |
-|---|:---:|:---:|:---:|
-| Audio bleibt auf dem Rechner | ✅ | ❌ Microsoft-Cloud | ❌ |
-| Funktioniert offline | ✅ nach dem Modell-Download | ❌ | ❌ |
-| Laufende Kosten | **0 €** | 0 € | meist Abo oder pro Minute |
-| Konto / API-Key nötig | ❌ | Microsoft-Konto nicht nötig | ✅ |
-| Push-to-Talk in **jeder** App | ✅ eine Taste, kein Fokuswechsel | ⚠️ Tastenkombi, Diktierleiste | je nach Anbieter |
-| Fachbegriffe (`Docker`, `Pull Request`) | ✅ per `initial_prompt` einstellbar | ⚠️ nicht anpassbar | je nach Anbieter |
-| Quellcode prüfbar | ✅ ca. 600 Zeilen Python | ❌ | ❌ |
-| Einrichtung | ⚠️ Python, ca. 3 GB Modell | ✅ nichts zu tun | ✅ |
+**Wispher** is a Windows push-to-talk dictation tool. Hold **F12**, speak, release: the transcribed text is pasted into whatever field has focus. It runs [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (`large-v3`) locally on CUDA or CPU. No cloud, no API key, no telemetry. Audio only touches `%TEMP%` briefly and is deleted after transcription.
 
-Wispher ist **nicht** das Richtige, wenn du nur ab und zu diktierst und keine Python-Umgebung willst. Dann reicht `Win`+`H`.
+```powershell
+git clone https://github.com/guschi18/wispher.git ; cd wispher
+pip install -r requirements.txt ; pip install nvidia-cublas-cu12 nvidia-cudnn-cu12   # 2nd part: NVIDIA GPU only
+python wispher_app.py
+```
+
+Set `language: en` in `config.yaml` for English dictation. The UI is in German. MIT licensed.
+
+</details>
+
+## Schnellstart
+
+**Voraussetzungen:** Windows 10/11, Python 3.10+, ein Mikrofon. Eine NVIDIA-GPU ist optional.
+
+```powershell
+git clone https://github.com/guschi18/wispher.git
+cd wispher
+python -m venv .venv ; .venv\Scripts\activate
+pip install -r requirements.txt
+python wispher_app.py
+```
+
+1. **Warten**, bis der Status im Fenster auf „Bereit" springt. Beim ersten Start lädt faster-whisper das Modell (`large-v3` ≈ 3 GB) einmalig von Hugging Face.
+2. **Cursor** in ein beliebiges Textfeld setzen.
+3. **F12 halten**, sprechen, loslassen. Fertig.
+
+Das Fenster schließen (X) schickt Wispher in den Tray. Beenden: Tray-Icon → Rechtsklick → **Beenden**.
+
+### Mit NVIDIA-GPU (empfohlen, deutlich schneller)
+
+```powershell
+pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
+```
+
+Ohne diese Pakete fällt Wispher automatisch auf die CPU zurück (siehe `wispher.log`). Mit CPU empfiehlt sich `model: small` und `use_gpu: false` in der `config.yaml`.
+
+### Eigene EXE bauen
+
+```powershell
+build.bat    # → dist\Wispher\Wispher.exe (ca. 3 GB mit CUDA-Libs)
+```
+
+Die EXE braucht den Ordner `_internal` und die `config.yaml` daneben. `make_icon.py` erzeugt das Icon in `assets/`.
 
 ## So funktioniert's
 
@@ -95,39 +130,22 @@ stateDiagram-v2
 
 </details>
 
-## Schnellstart
+## Warum Wispher?
 
-**Voraussetzungen:** Windows 10/11, Python 3.10+, ein Mikrofon. Eine NVIDIA-GPU ist optional.
+Du diktierst Prompts, Commit-Messages und Mails und willst dabei nicht die Hände von der Tastatur nehmen. Du willst auch keinen Dienst, der jedes Wort mithört.
 
-```powershell
-git clone https://github.com/guschi18/wispher.git
-cd wispher
-python -m venv .venv ; .venv\Scripts\activate
-pip install -r requirements.txt
-python wispher_app.py
-```
+| | **Wispher** | Windows-Diktat (`Win`+`H`) | Cloud-Diktierdienste |
+|---|:---:|:---:|:---:|
+| Audio bleibt auf dem Rechner | ✅ | ❌ Microsoft-Cloud | ❌ |
+| Funktioniert offline | ✅ nach dem Modell-Download | ❌ | ❌ |
+| Laufende Kosten | **0 €** | 0 € | meist Abo oder pro Minute |
+| Konto / API-Key nötig | ❌ | Microsoft-Konto nicht nötig | ✅ |
+| Push-to-Talk in **jeder** App | ✅ eine Taste, kein Fokuswechsel | ⚠️ Tastenkombi, Diktierleiste | je nach Anbieter |
+| Fachbegriffe (`Docker`, `Pull Request`) | ✅ per `initial_prompt` einstellbar | ⚠️ nicht anpassbar | je nach Anbieter |
+| Quellcode prüfbar | ✅ ca. 600 Zeilen Python | ❌ | ❌ |
+| Einrichtung | ⚠️ Python, ca. 3 GB Modell | ✅ nichts zu tun | ✅ |
 
-1. **Warten**, bis der Status im Fenster auf „Bereit" springt. Beim ersten Start lädt faster-whisper das Modell (`large-v3` ≈ 3 GB) einmalig von Hugging Face.
-2. **Cursor** in ein beliebiges Textfeld setzen.
-3. **F12 halten**, sprechen, loslassen. Fertig.
-
-Das Fenster schließen (X) schickt Wispher in den Tray. Beenden: Tray-Icon → Rechtsklick → **Beenden**.
-
-### Mit NVIDIA-GPU (empfohlen, deutlich schneller)
-
-```powershell
-pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
-```
-
-Ohne diese Pakete fällt Wispher automatisch auf die CPU zurück (siehe `wispher.log`). Mit CPU empfiehlt sich `model: small` und `use_gpu: false` in der `config.yaml`.
-
-### Eigene EXE bauen
-
-```powershell
-build.bat    # → dist\Wispher\Wispher.exe (ca. 3 GB mit CUDA-Libs)
-```
-
-Die EXE braucht den Ordner `_internal` und die `config.yaml` daneben. `make_icon.py` erzeugt das Icon in `assets/`.
+Wispher ist **nicht** das Richtige, wenn du nur ab und zu diktierst und keine Python-Umgebung willst. Dann reicht `Win`+`H`.
 
 ## Konfiguration (`config.yaml`)
 
@@ -194,7 +212,7 @@ Das ist der einfachste Hebel gegen falsch gehörte Fachbegriffe. Kein Training n
 <details>
 <summary><b>Gibt es Linux oder macOS?</b></summary>
 <br>
-Nein. Wispher nutzt Windows-APIs (`ctypes.windll`) für Einfügen, Piepton und Titelleiste. Ein Port wäre möglich, ist aber nicht geplant.
+Nein. Wispher nutzt Windows-APIs (`ctypes.windll`) für Einfügen, Piepton und Titelleiste. Ein Port ist nicht vorgesehen.
 </details>
 
 <details>
