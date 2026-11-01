@@ -98,16 +98,55 @@ Die EXE braucht den Ordner `_internal` und die `config.yaml` daneben. `make_icon
 
 ## Konfiguration (`config.yaml`)
 
+Die Datei liegt neben `wispher_app.py` bzw. neben der EXE. Änderungen gelten nach einem Neustart.
+
+```yaml
+hotkey: F12                  # eine einzelne Taste, z. B. F9, pause, scroll lock, right ctrl
+language: de                 # Whisper-Sprache: de, en, fr, es …
+model: large-v3              # tiny · base · small · medium · large-v3
+use_gpu: true                # false = CPU (int8)
+max_recording_seconds: 60    # Fail-Safe gegen vergessene Taste
+auto_paste: true             # false = nur in die Zwischenablage, kein Ctrl+V
+beep_on_start: false
+beep_on_end: false
+initial_prompt: "Das ist ein deutscher Text mit englischen Begriffen wie Claude Code, GitHub, Docker."
+```
+
+### Welches Modell?
+
+| `model` | Download | VRAM (Richtwert) | Wann nehmen? |
+|---|---:|---:|---|
+| `tiny` | ca. 75 MB | ca. 1 GB | Nur zum Testen. Fehlerquote hoch. |
+| `base` | ca. 145 MB | ca. 1 GB | Ältere CPU, kurze Befehle. |
+| `small` | ca. 460 MB | ca. 2 GB | **CPU-Rechner.** Brauchbar für Deutsch. |
+| `medium` | ca. 1,5 GB | ca. 5 GB | GPU mit wenig VRAM. |
+| `large-v3` | ca. 2,9 GB | ca. 10 GB nach OpenAI-Angabe | **Vorgabe.** Beste Qualität, auch bei Fachbegriffen. |
+
+Download-Größen stammen aus dem lokalen Hugging-Face-Cache (`Systran/faster-whisper-*`). Die VRAM-Werte sind Richtwerte aus der [Whisper-Dokumentation](https://github.com/openai/whisper#available-models-and-languages). faster-whisper braucht mit `float16` meist weniger.
+
+### Fachbegriffe beibringen (`initial_prompt`)
+
+Whisper übernimmt Schreibweisen aus dem `initial_prompt`. Schreib die Wörter hinein, die es falsch hört:
+
+```yaml
+initial_prompt: "Gespräch über Kubernetes, Pull Requests, Supabase, TypeScript und Claude Code."
+```
+
+Das ist der einfachste Hebel gegen „Docker" → „Dogger". Kein Training nötig.
+
+### Alle Schlüssel
+
 | Schlüssel | Vorgabe | Bedeutung |
 |---|---|---|
+| `hotkey` | `F12` | Push-to-Talk-Taste. Wispher blockiert sie für andere Programme. |
 | `language` | `de` | Whisper-Sprache |
-| `hotkey` | `F12` | Push-to-Talk-Taste |
-| `initial_prompt` | – | Hilft bei Fachbegriffen und englischen Wörtern im Satz |
-| `model` | `large-v3` | faster-whisper-Modellgröße (`tiny` … `large-v3`) |
-| `use_gpu` | `true` | CUDA nutzen, wenn verfügbar |
-| `max_recording_seconds` | `60` | Fail-Safe gegen vergessene F12-Taste |
-| `auto_paste` | `true` | Text per Ctrl+V einfügen (sonst nur Zwischenablage) |
-| `beep_on_start` / `beep_on_end` | `false` | Audio-Feedback bei Aufnahmebeginn/-ende |
+| `model` | `large-v3` | faster-whisper-Modellgröße |
+| `use_gpu` | `true` | CUDA nutzen, sonst CPU |
+| `max_recording_seconds` | `60` | Aufnahme stoppt automatisch |
+| `auto_paste` | `true` | Text per Ctrl+V einfügen |
+| `beep_on_start` / `beep_on_end` | `false` | Piepton bei Start/Ende |
+| `initial_prompt` | siehe oben | Vokabular-Hinweis für Whisper |
+| `temp_dir` | `%TEMP%\stt` | Ort der temporären WAV-Datei |
 
 ## Datenschutz
 
