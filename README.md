@@ -63,7 +63,7 @@ python wispher_app.py
 
 Das Fenster schließen (X) schickt Wispher in den Tray. Beenden: Tray-Icon → Rechtsklick → **Beenden**.
 
-### Mit NVIDIA-GPU (empfohlen, ca. 10× schneller)
+### Mit NVIDIA-GPU (empfohlen, deutlich schneller)
 
 ```powershell
 pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
