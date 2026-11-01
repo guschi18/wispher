@@ -45,22 +45,39 @@ im Zielfeld gelandet ist.
 
 <p align="center"><img src="assets/screenshot.png" alt="Wispher-Fenster" width="320"></p>
 
-## Installation
+## Schnellstart
 
-**Voraussetzungen:** Python 3.10+, optional NVIDIA-GPU + CUDA (ohne GPU fällt
-Wispher automatisch auf CPU zurück, `use_gpu` in der `config.yaml`).
+**Voraussetzungen:** Windows 10/11, Python 3.10+, ein Mikrofon. Eine NVIDIA-GPU ist optional.
 
-```bash
+```powershell
+git clone https://github.com/guschi18/wispher.git
+cd wispher
+python -m venv .venv ; .venv\Scriptsctivate
 pip install -r requirements.txt
-python wispher_app.py    # aus dem Quellcode starten
-build.bat                # baut dist\Wispher\Wispher.exe (ca. 3 GB mit CUDA-Libs)
+python wispher_app.py
 ```
 
-Die EXE braucht den Ordner `_internal` und `config.yaml` daneben.
-`make_icon.py` erzeugt das Icon in `assets/`.
+1. **Warten**, bis der Status im Fenster auf „Bereit" springt. Beim ersten Start lädt faster-whisper das Modell (`large-v3` ≈ 3 GB) einmalig von Hugging Face.
+2. **Cursor** in ein beliebiges Textfeld setzen.
+3. **F12 halten**, sprechen, loslassen. Fertig.
 
-**Benutzung:** `Wispher.exe` starten, F12 halten, sprechen, loslassen. Beenden
-über das Tray-Icon (Rechtsklick → Beenden). Logs: `wispher.log` neben der EXE.
+Das Fenster schließen (X) schickt Wispher in den Tray. Beenden: Tray-Icon → Rechtsklick → **Beenden**.
+
+### Mit NVIDIA-GPU (empfohlen, ca. 10× schneller)
+
+```powershell
+pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
+```
+
+Ohne diese Pakete fällt Wispher automatisch auf die CPU zurück (siehe `wispher.log`). Mit CPU empfiehlt sich `model: small` und `use_gpu: false` in der `config.yaml`.
+
+### Eigene EXE bauen
+
+```powershell
+build.bat    # → dist\Wispher\Wispher.exe (ca. 3 GB mit CUDA-Libs)
+```
+
+Die EXE braucht den Ordner `_internal` und die `config.yaml` daneben. `make_icon.py` erzeugt das Icon in `assets/`.
 
 ## Konfiguration (`config.yaml`)
 
