@@ -27,6 +27,8 @@ lokal (CUDA oder CPU), aufgenommene Audio-Rohdaten landen nur temporär im
 `%TEMP%` und werden nach der Transkription gelöscht — die Sprache verlässt
 den Rechner zu keinem Zeitpunkt.
 
+<p align="center"><img src="assets/demo.svg" alt="Animation: F12 halten, sprechen, loslassen, der Text erscheint im Feld" width="900"></p>
+
 <p align="center"><img src="assets/screenshot.png" alt="Wispher-Fenster" width="320"></p>
 
 Wispher ist eine Windows-App mit Tray-Icon und kleinem Fenster. Das Fenster
