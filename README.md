@@ -28,6 +28,23 @@ läuft lokal auf GPU (CUDA) oder CPU. Die Audio-Rohdaten liegen nur kurz im
 
 <p align="center"><img src="assets/demo.svg" alt="Animation: F12 halten, sprechen, loslassen, der Text erscheint im Feld" width="900"></p>
 
+## Warum Wispher?
+
+Du diktierst Prompts, Commit-Messages und Mails und willst dabei nicht die Hände von der Tastatur nehmen. Du willst auch keinen Dienst, der jedes Wort mithört.
+
+| | **Wispher** | Windows-Diktat (`Win`+`H`) | Cloud-Diktierdienste |
+|---|:---:|:---:|:---:|
+| Audio bleibt auf dem Rechner | ✅ | ❌ Microsoft-Cloud | ❌ |
+| Funktioniert offline | ✅ nach dem Modell-Download | ❌ | ❌ |
+| Laufende Kosten | **0 €** | 0 € | meist Abo oder pro Minute |
+| Konto / API-Key nötig | ❌ | Microsoft-Konto nicht nötig | ✅ |
+| Push-to-Talk in **jeder** App | ✅ eine Taste, kein Fokuswechsel | ⚠️ Tastenkombi, Diktierleiste | je nach Anbieter |
+| Fachbegriffe (`Docker`, `Pull Request`) | ✅ per `initial_prompt` einstellbar | ⚠️ nicht anpassbar | je nach Anbieter |
+| Quellcode prüfbar | ✅ ca. 600 Zeilen Python | ❌ | ❌ |
+| Einrichtung | ⚠️ Python, ca. 3 GB Modell | ✅ nichts zu tun | ✅ |
+
+Wispher ist **nicht** das Richtige, wenn du nur ab und zu diktierst und keine Python-Umgebung willst. Dann reicht `Win`+`H`.
+
 ## So funktioniert's
 
 ```mermaid
