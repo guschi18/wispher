@@ -52,7 +52,7 @@ im Zielfeld gelandet ist.
 ```powershell
 git clone https://github.com/guschi18/wispher.git
 cd wispher
-python -m venv .venv ; .venv\Scriptsctivate
+python -m venv .venv ; .venv\Scripts\activate
 pip install -r requirements.txt
 python wispher_app.py
 ```
