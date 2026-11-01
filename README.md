@@ -58,9 +58,42 @@ flowchart LR
 
 Wispher läuft als Tray-Icon mit kleinem Fenster. Das Fenster zeigt den letzten
 Text. Ein Klick auf **Kopieren** legt ihn in die Zwischenablage, falls er nicht
-im Zielfeld gelandet ist.
+im Zielfeld gelandet ist. Das Fenster zeigt immer einen von vier Zuständen:
 
 <p align="center"><img src="assets/ablauf.png" alt="Das Wispher-Fenster in drei Zuständen: Nimmt auf, Transkribiere, Bereit mit fertigem Text" width="900"></p>
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Laden: Start
+    Laden --> Bereit: Modell geladen
+    Bereit --> Aufnahme: F12 runter
+    Aufnahme --> Transkription: F12 hoch
+    Aufnahme --> Bereit: kürzer als 0,4 s
+    Aufnahme --> Transkription: 60 s erreicht (Fail-Safe)
+    Transkription --> Bereit: Text eingefügt
+    Laden: 🟡 Modell lädt …
+    Bereit: 🟢 Bereit
+    Aufnahme: 🔴 Nimmt auf …
+    Transkription: 🟠 Transkribiere …
+```
+
+<details>
+<summary><b>Unter der Haube</b> — Aufnahme, Modell, Einfügen</summary>
+
+<br>
+
+| Stufe | Was passiert | Detail |
+|---|---|---|
+| Hotkey | Paket `keyboard` fängt die Taste ab. Auto-Repeat beim Halten wird ignoriert. | `suppress=True`: andere Programme sehen die Taste nicht. |
+| Befehlsschlange | START und STOP laufen nacheinander durch eine Queue. | Keine Race Conditions bei schnellem Tippen. |
+| Aufnahme | `sounddevice`, 16 kHz, mono, `float32` → `int16`-WAV in `%TEMP%\stt`. | Unter 0,4 s wird verworfen. Nach `max_recording_seconds` stoppt der Fail-Safe. |
+| Erkennung | faster-whisper mit `beam_size=5` und `vad_filter=True`. | Stille wird herausgefiltert. `condition_on_previous_text=False` verhindert Wiederholungsschleifen. |
+| GPU-Test | Beim Start läuft ein 1-Sekunden-Test auf CUDA. | Schlägt er fehl, lädt Wispher dasselbe Modell auf der CPU (`int8`). |
+| Aufräumen | Mehrfache Leerzeichen und Zeilenumbrüche werden zu einem Leerzeichen. | |
+| Einfügen | Text → Zwischenablage → simuliertes `Ctrl`+`V` (`keybd_event`). | Mit `auto_paste: false` bleibt es bei der Zwischenablage. |
+
+</details>
 
 ## Schnellstart
 
