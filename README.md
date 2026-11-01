@@ -181,6 +181,52 @@ Das ist der einfachste Hebel gegen falsch gehörte Fachbegriffe. Kein Training n
 | `initial_prompt` | siehe oben | Vokabular-Hinweis für Whisper |
 | `temp_dir` | `%TEMP%\stt` | Ort der temporären WAV-Datei |
 
+## Tipps für gutes Diktat
+
+- **Ganze Sätze sprechen.** Whisper setzt Satzzeichen und Großschreibung selbst. Kurze Wortfetzen erkennt es schlechter.
+- **Eine halbe Sekunde warten**, bevor du F12 loslässt. Sonst fehlt manchmal das letzte Wort.
+- **Eine Aufnahme = ein Gedanke.** Lange Monologe (bis `max_recording_seconds`) funktionieren, aber die Transkription dauert entsprechend.
+- **Prompt im Stil des Ziels schreiben.** Der `initial_prompt` prägt die Schreibweise. Mit Satzzeichen im Prompt kommen Satzzeichen im Ergebnis.
+- **Fehlt etwas im Feld?** Klick im Wispher-Fenster auf **Kopieren** und füg mit `Strg`+`V` ein.
+
+## Häufige Fragen
+
+<details>
+<summary><b>Gibt es Linux oder macOS?</b></summary>
+<br>
+Nein. Wispher nutzt Windows-APIs (`ctypes.windll`) für Einfügen, Piepton und Titelleiste. Ein Port wäre möglich, ist aber nicht geplant.
+</details>
+
+<details>
+<summary><b>Läuft Wispher ohne NVIDIA-Grafikkarte?</b></summary>
+<br>
+Ja. Setz <code>use_gpu: false</code> und <code>model: small</code>. Wispher rechnet dann auf der CPU mit <code>int8</code>. Es ist langsamer, aber nutzbar.
+</details>
+
+<details>
+<summary><b>Kann ich eine andere Sprache diktieren?</b></summary>
+<br>
+Ja. Setz <code>language</code> auf einen Whisper-Sprachcode wie <code>en</code>, <code>fr</code> oder <code>es</code> und passe den <code>initial_prompt</code> an. Pro Start gilt genau eine Sprache.
+</details>
+
+<details>
+<summary><b>Sieht man den Text schon während ich spreche?</b></summary>
+<br>
+Nein. Wispher nimmt auf, solange du die Taste hältst, und transkribiert nach dem Loslassen. Live-Streaming ist bewusst nicht enthalten.
+</details>
+
+<details>
+<summary><b>Warum ca. 3 GB für die EXE?</b></summary>
+<br>
+Die EXE bündelt Python, faster-whisper, CTranslate2 und die NVIDIA-CUDA-Bibliotheken. Das Modell (<code>large-v3</code>, ca. 2,9 GB) kommt zusätzlich beim ersten Start in den Hugging-Face-Cache.
+</details>
+
+<details>
+<summary><b>Kann ich Wispher beim Windows-Start automatisch starten?</b></summary>
+<br>
+Ja. Drück <code>Win</code>+<code>R</code>, gib <code>shell:startup</code> ein und leg dort eine Verknüpfung auf <code>Wispher.exe</code> ab.
+</details>
+
 ## Datenschutz — prüf es selbst
 
 Du musst mir nicht glauben. Der gesamte Code besteht aus zwei Dateien, `wispher.py` und `wispher_app.py`.
