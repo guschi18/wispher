@@ -11,8 +11,8 @@ den Rechner zu keinem Zeitpunkt.
 <p align="center"><img src="assets/screenshot.png" alt="Wispher-Fenster" width="320"></p>
 
 Wispher ist eine Windows-App mit Tray-Icon und kleinem Fenster. Das Fenster
-zeigt den letzten Text und einen Verlauf — ein Klick kopiert den Text, falls er
-nicht automatisch im Zielfeld gelandet ist.
+zeigt den letzten Text — ein Klick auf **Kopieren** legt ihn in die
+Zwischenablage, falls er nicht im Zielfeld gelandet ist.
 
 ```
  F12 (keyboard-Paket)        Wispher.exe (Python)                 Ziel-App
@@ -26,7 +26,7 @@ nicht automatisch im Zielfeld gelandet ist.
 │                │        │   ↓                  │
 │                │        │ TextInjector ── Ctrl+V ──▶  aktives Feld
 └────────────────┘        └──────────────────────┘
-                           Tray-Icon + Fenster (Klick = kopieren)
+                           Tray-Icon + Fenster (Kopieren-Button)
 ```
 
 ## Installation
@@ -53,7 +53,7 @@ Die EXE braucht den Ordner `_internal` und `config.yaml` daneben.
 | `language` | `de` | Whisper-Sprache |
 | `hotkey` | `F12` | Push-to-Talk-Taste |
 | `initial_prompt` | – | Hilft bei Fachbegriffen und englischen Wörtern im Satz |
-| `model` | `small` | faster-whisper-Modellgröße (`tiny` … `large-v3`) |
+| `model` | `large-v3` | faster-whisper-Modellgröße (`tiny` … `large-v3`) |
 | `use_gpu` | `true` | CUDA nutzen, wenn verfügbar |
 | `max_recording_seconds` | `60` | Fail-Safe gegen vergessene F12-Taste |
 | `auto_paste` | `true` | Text per Ctrl+V einfügen (sonst nur Zwischenablage) |
