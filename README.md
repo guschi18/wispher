@@ -14,7 +14,7 @@
 <a href="#warum-wispher">Warum Wispher?</a> ·
 <a href="#konfiguration-configyaml">Konfiguration</a> ·
 <a href="#datenschutz--prüf-es-selbst">Datenschutz</a> ·
-<a href="#lizenz">Lizenz</a>
+<a href="#fehlersuche">Fehlersuche</a>
 </p>
 
 # Wispher — Local Push-to-Talk Speech-to-Text
@@ -182,6 +182,25 @@ setx HF_HUB_OFFLINE 1     # danach Wispher neu starten
 - Stürzt der Rechner mitten in der Transkription ab, bleibt die WAV-Datei in `%TEMP%\stt` liegen. Lösch sie von Hand.
 - Mit `auto_paste: true` überschreibt Wispher deine Zwischenablage mit dem Diktat. Passwort-Manager-Inhalte darin sind dann weg.
 - Wispher hängt einen globalen Tastatur-Hook ein (Paket [`keyboard`](https://github.com/boppreh/keyboard)). Der Code reagiert nur auf die konfigurierte Taste. Manche Virenscanner melden trotzdem einen Treffer.
+
+## Fehlersuche
+
+Als EXE schreibt Wispher ein Log nach `wispher.log` neben die EXE. Aus dem Quellcode erscheint das Log im Terminal.
+
+| Symptom | Ursache | Lösung |
+|---|---|---|
+| Status bleibt lange auf „Modell lädt …" | Erster Start: `large-v3` lädt ca. 2,9 GB von Hugging Face. | Warten. Danach startet es aus dem Cache. |
+| Log: `GPU init failed … falling back to CPU` | CUDA-Bibliotheken fehlen oder passen nicht zum Treiber. | `pip install nvidia-cublas-cu12 nvidia-cudnn-cu12`, NVIDIA-Treiber aktualisieren. Oder bewusst `use_gpu: false` und `model: small`. |
+| Transkription dauert sehr lang | Läuft auf der CPU mit `large-v3`. | `model: small` oder `base` setzen. |
+| F12 tut nichts | Wispher läuft schon. Eine zweite Instanz beendet sich ohne Meldung (Port 9902). | Tray-Icon suchen. Doppelt gestartete Instanz im Task-Manager beenden. |
+| F12 öffnet in anderen Programmen nichts mehr (z. B. DevTools) | Wispher blockiert die Taste systemweit. | `hotkey:` auf eine freie Taste ändern, z. B. `pause` oder `scroll lock`. |
+| Text erscheint im Fenster, aber nicht im Zielfeld | Zielprogramm läuft als Administrator. Windows blockiert dann Tastatur-Hook und Ctrl+V. | Auf **Kopieren** klicken und selbst einfügen. Oder Wispher ebenfalls als Administrator starten. |
+| Nichts passiert nach dem Loslassen | Aufnahme kürzer als 0,4 s oder nur Stille. Beides verwirft Wispher. | Taste länger halten und lauter sprechen. |
+| Text ist leer oder Unsinn | Falsches Mikrofon. Wispher nimmt das Windows-Standardgerät. | Standard-Mikrofon in Windows → Einstellungen → Sound setzen. |
+| Englische Wörter falsch geschrieben | Whisper kennt den Begriff nicht. | Wort in `initial_prompt` aufnehmen. |
+| EXE startet nicht | `_internal` oder `config.yaml` fehlt neben der EXE. | Den gesamten Ordner `dist\Wispher` verschieben, nicht nur die EXE. |
+
+Hilft das nicht? Öffne ein [Issue](https://github.com/guschi18/wispher/issues) und häng die letzten Zeilen aus `wispher.log` an. Schwärze vorher Namen und Pfade, die du nicht teilen willst.
 
 ## Schriften
 
