@@ -13,7 +13,7 @@
 <a href="#schnellstart">Schnellstart</a> ·
 <a href="#warum-wispher">Warum Wispher?</a> ·
 <a href="#konfiguration-configyaml">Konfiguration</a> ·
-<a href="#datenschutz">Datenschutz</a> ·
+<a href="#datenschutz--prüf-es-selbst">Datenschutz</a> ·
 <a href="#lizenz">Lizenz</a>
 </p>
 
@@ -132,7 +132,7 @@ Whisper übernimmt Schreibweisen aus dem `initial_prompt`. Schreib die Wörter h
 initial_prompt: "Gespräch über Kubernetes, Pull Requests, Supabase, TypeScript und Claude Code."
 ```
 
-Das ist der einfachste Hebel gegen „Docker" → „Dogger". Kein Training nötig.
+Das ist der einfachste Hebel gegen falsch gehörte Fachbegriffe. Kein Training nötig.
 
 ### Alle Schlüssel
 
@@ -148,12 +148,40 @@ Das ist der einfachste Hebel gegen „Docker" → „Dogger". Kein Training nöt
 | `initial_prompt` | siehe oben | Vokabular-Hinweis für Whisper |
 | `temp_dir` | `%TEMP%\stt` | Ort der temporären WAV-Datei |
 
-## Datenschutz
+## Datenschutz — prüf es selbst
 
-- Audio wird ausschließlich als temporäre WAV-Datei in `%TEMP%\stt`
-  geschrieben und im `finally`-Block gelöscht — auch bei Fehlern.
-- Transkription läuft vollständig offline über faster-whisper.
-- Keine Telemetrie. Nur beim ersten Start lädt faster-whisper das Modell von Hugging Face herunter. Audio und Text verlassen den Rechner nie.
+Du musst mir nicht glauben. Der gesamte Code besteht aus zwei Dateien, `wispher.py` und `wispher_app.py`.
+
+| Was | Wohin | Wie lange |
+|---|---|---|
+| Mikrofon-Audio | `%TEMP%\stt\rec_*.wav` | bis zum Ende der Transkription, dann `unlink()` im `finally`-Block |
+| Erkannter Text | Arbeitsspeicher, Zwischenablage, Zielfeld | Zwischenablage bis zur nächsten Kopie |
+| Modell | `~\.cache\huggingface` | dauerhaft, einmaliger Download |
+| Netzwerk-Verkehr | **nur** der Modell-Download beim ersten Start | — |
+| Telemetrie, Konto, Analytics | **keine** | — |
+
+**1. Im Code suchen.** Beide Dateien enthalten keine HTTP-Bibliothek und keine URL:
+
+```powershell
+Select-String -Path wispher.py, wispher_app.py -Pattern "requests|urllib|http|telemetry"
+# → keine Treffer
+```
+
+Der einzige Socket ist `127.0.0.1:9902`, die Sperre gegen eine zweite Instanz. Er ist nur lokal erreichbar.
+
+**2. Nach dem Download komplett offline gehen.** Dann blockiert auch die Hugging-Face-Bibliothek jeden Verbindungsversuch:
+
+```powershell
+setx HF_HUB_OFFLINE 1     # danach Wispher neu starten
+```
+
+**3. Den Netzwerkverkehr selbst messen.** Windows-Firewall: ausgehende Verbindungen für `python.exe` bzw. `Wispher.exe` blockieren. Wispher diktiert trotzdem weiter.
+
+**Ehrliche Grenzen**
+
+- Stürzt der Rechner mitten in der Transkription ab, bleibt die WAV-Datei in `%TEMP%\stt` liegen. Lösch sie von Hand.
+- Mit `auto_paste: true` überschreibt Wispher deine Zwischenablage mit dem Diktat. Passwort-Manager-Inhalte darin sind dann weg.
+- Wispher hängt einen globalen Tastatur-Hook ein (Paket [`keyboard`](https://github.com/boppreh/keyboard)). Der Code reagiert nur auf die konfigurierte Taste. Manche Virenscanner melden trotzdem einen Treffer.
 
 ## Schriften
 
