@@ -14,7 +14,7 @@
 <a href="#warum-wispher">Warum Wispher?</a> ·
 <a href="#konfiguration-configyaml">Konfiguration</a> ·
 <a href="#datenschutz">Datenschutz</a> ·
-<a href="#fehlersuche">Fehlersuche</a>
+<a href="#lizenz">Lizenz</a>
 </p>
 
 # Wispher — Local Push-to-Talk Speech-to-Text
