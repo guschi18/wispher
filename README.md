@@ -22,33 +22,28 @@
 **F12 halten → sprechen → loslassen → der Text steht im aktiven Feld.**
 100 % lokal. Keine Cloud. Kein API-Key. Kein Mikrofon-Bit, das dein Büro verlässt.
 
-Wispher ist ein Windows-Tool für Push-to-Talk-Diktat: faster-whisper läuft
-lokal (CUDA oder CPU), aufgenommene Audio-Rohdaten landen nur temporär im
-`%TEMP%` und werden nach der Transkription gelöscht — die Sprache verlässt
-den Rechner zu keinem Zeitpunkt.
+Wispher ist ein Windows-Tool für Push-to-Talk-Diktat. [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
+läuft lokal auf GPU (CUDA) oder CPU. Die Audio-Rohdaten liegen nur kurz im
+`%TEMP%` und werden nach der Transkription gelöscht.
 
 <p align="center"><img src="assets/demo.svg" alt="Animation: F12 halten, sprechen, loslassen, der Text erscheint im Feld" width="900"></p>
 
+## So funktioniert's
+
+```mermaid
+flowchart LR
+    K["⌨️ F12<br/>halten"] -->|START| R["🎙️ AudioRecorder<br/>16 kHz · mono"]
+    R -->|loslassen = STOP| T["🧠 faster-whisper<br/>CUDA → CPU-Fallback"]
+    T --> P["✂️ TextProcessor<br/>Leerzeichen bereinigen"]
+    P -->|Ctrl+V| Z["📝 aktives Feld<br/>jede App"]
+    P -.->|Kopieren-Button| C["📋 Zwischenablage"]
+```
+
+Wispher läuft als Tray-Icon mit kleinem Fenster. Das Fenster zeigt den letzten
+Text. Ein Klick auf **Kopieren** legt ihn in die Zwischenablage, falls er nicht
+im Zielfeld gelandet ist.
+
 <p align="center"><img src="assets/screenshot.png" alt="Wispher-Fenster" width="320"></p>
-
-Wispher ist eine Windows-App mit Tray-Icon und kleinem Fenster. Das Fenster
-zeigt den letzten Text — ein Klick auf **Kopieren** legt ihn in die
-Zwischenablage, falls er nicht im Zielfeld gelandet ist.
-
-```
- F12 (keyboard-Paket)        Wispher.exe (Python)                 Ziel-App
-┌────────────────┐        ┌──────────────────────┐
-│ halten = START │ ─────▶ │ AudioRecorder        │
-│                │        │   ↓ WAV (nur %TEMP%) │
-│                │        │ STTEngine            │
-│                │        │   (faster-whisper,   │
-│ loslassen=STOP │ ─────▶ │    CUDA/CPU-Fallback)│
-│                │        │ TextProcessor        │
-│                │        │   ↓                  │
-│                │        │ TextInjector ── Ctrl+V ──▶  aktives Feld
-└────────────────┘        └──────────────────────┘
-                           Tray-Icon + Fenster (Kopieren-Button)
-```
 
 ## Installation
 
