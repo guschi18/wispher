@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Wispher: F12 halten, sprechen, loslassen. Lokales Push-to-Talk-Diktat für Windows.">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#241a14"/><stop offset="1" stop-color="#15100c"/></linearGradient>
+<linearGradient id="ac" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa070"/><stop offset="1" stop-color="#ff8a4c"/></linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ff8a4c" stop-opacity="0.28"/><stop offset="1" stop-color="#ff8a4c" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="900" height="300" rx="24" fill="url(#bg)"/>
+<rect x="0.5" y="0.5" width="899" height="299" rx="23.5" fill="none" stroke="#43301f"/>
+<circle cx="720" cy="150" r="190" fill="url(#glow)"/>
+<g transform="translate(56 64)">
+<rect width="64" height="64" rx="16" fill="url(#ac)"/>
+<rect x="25" y="14" width="14" height="25" rx="7" fill="#2a1608"/>
+<path d="M19 31a13 13 0 0 0 26 0M32 44v7M25 51h14" fill="none" stroke="#2a1608" stroke-width="3.5" stroke-linecap="round"/>
+</g>
+<text x="140" y="118" font-family="Instrument Serif, Georgia, 'Times New Roman', serif" font-size="68" fill="#f6ece1">Wispher</text>
+<text x="56" y="188" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="25" fill="#f6ece1">Taste halten. Sprechen. Loslassen.</text>
+<text x="56" y="222" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="25" fill="#ff8a4c">Der Text steht im aktiven Feld.</text>
+<text x="56" y="264" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#a3917f" letter-spacing="1.5">100 % LOKAL  ·  KEINE CLOUD  ·  KEIN API-KEY  ·  WINDOWS</text>
+<g transform="translate(640 70)">
+<rect x="0" y="0" width="110" height="64" rx="14" fill="#2a2019" stroke="#43301f" stroke-width="2"/>
+<rect x="0" y="0" width="110" height="58" rx="14" fill="#37291f"/>
+<text x="55" y="40" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="30" font-weight="700" fill="#f6ece1">F12</text>
+</g>
+<rect x="640" y="145.0" width="7" rx="3.5" height="10" fill="url(#ac)"><animate attributeName="height" values="10;8;10" dur="0.90s" repeatCount="indefinite"/><animate attributeName="y" values="145.0;146.0;145.0" dur="0.90s" repeatCount="indefinite"/></rect>
+<rect x="654" y="139.0" width="7" rx="3.5" height="22" fill="url(#ac)"><animate attributeName="height" values="22;8;22" dur="1.07s" repeatCount="indefinite"/><animate attributeName="y" values="139.0;146.0;139.0" dur="1.07s" repeatCount="indefinite"/></rect>
+<rect x="668" y="131.0" width="7" rx="3.5" height="38" fill="url(#ac)"><animate attributeName="height" values="38;13;38" dur="1.24s" repeatCount="indefinite"/><animate attributeName="y" values="131.0;143.3;131.0" dur="1.24s" repeatCount="indefinite"/></rect>
+<rect x="682" y="137.0" width="7" rx="3.5" height="26" fill="url(#ac)"><animate attributeName="height" values="26;9;26" dur="1.41s" repeatCount="indefinite"/><animate attributeName="y" values="137.0;145.4;137.0" dur="1.41s" repeatCount="indefinite"/></rect>
+<rect x="696" y="124.0" width="7" rx="3.5" height="52" fill="url(#ac)"><animate attributeName="height" values="52;18;52" dur="1.58s" repeatCount="indefinite"/><animate attributeName="y" values="124.0;140.9;124.0" dur="1.58s" repeatCount="indefinite"/></rect>
+<rect x="710" y="133.0" width="7" rx="3.5" height="34" fill="url(#ac)"><animate attributeName="height" values="34;12;34" dur="0.90s" repeatCount="indefinite"/><animate attributeName="y" values="133.0;144.1;133.0" dur="0.90s" repeatCount="indefinite"/></rect>
+<rect x="724" y="120.0" width="7" rx="3.5" height="60" fill="url(#ac)"><animate attributeName="height" values="60;21;60" dur="1.07s" repeatCount="indefinite"/><animate attributeName="y" values="120.0;139.5;120.0" dur="1.07s" repeatCount="indefinite"/></rect>
+<rect x="738" y="130.0" width="7" rx="3.5" height="40" fill="url(#ac)"><animate attributeName="height" values="40;14;40" dur="1.24s" repeatCount="indefinite"/><animate attributeName="y" values="130.0;143.0;130.0" dur="1.24s" repeatCount="indefinite"/></rect>
+<rect x="752" y="136.0" width="7" rx="3.5" height="28" fill="url(#ac)"><animate attributeName="height" values="28;10;28" dur="1.41s" repeatCount="indefinite"/><animate attributeName="y" values="136.0;145.1;136.0" dur="1.41s" repeatCount="indefinite"/></rect>
+<rect x="766" y="127.0" width="7" rx="3.5" height="46" fill="url(#ac)"><animate attributeName="height" values="46;16;46" dur="1.58s" repeatCount="indefinite"/><animate attributeName="y" values="127.0;141.9;127.0" dur="1.58s" repeatCount="indefinite"/></rect>
+<rect x="780" y="141.0" width="7" rx="3.5" height="18" fill="url(#ac)"><animate attributeName="height" values="18;8;18" dur="0.90s" repeatCount="indefinite"/><animate attributeName="y" values="141.0;146.0;141.0" dur="0.90s" repeatCount="indefinite"/></rect>
+<rect x="794" y="134.0" width="7" rx="3.5" height="32" fill="url(#ac)"><animate attributeName="height" values="32;11;32" dur="1.07s" repeatCount="indefinite"/><animate attributeName="y" values="134.0;144.4;134.0" dur="1.07s" repeatCount="indefinite"/></rect>
+<rect x="808" y="144.0" width="7" rx="3.5" height="12" fill="url(#ac)"><animate attributeName="height" values="12;8;12" dur="1.24s" repeatCount="indefinite"/><animate attributeName="y" values="144.0;146.0;144.0" dur="1.24s" repeatCount="indefinite"/></rect>
+
+<text x="640" y="236" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#a3917f">faster-whisper · CUDA / CPU</text>
+</svg>

@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.svg" alt="Wispher — F12 halten, sprechen, loslassen" width="900"></p>
+
 # Wispher — Local Push-to-Talk Speech-to-Text
 
 **F12 halten → sprechen → loslassen → der Text steht im aktiven Feld.**
