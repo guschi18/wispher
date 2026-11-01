@@ -60,7 +60,7 @@ Wispher läuft als Tray-Icon mit kleinem Fenster. Das Fenster zeigt den letzten
 Text. Ein Klick auf **Kopieren** legt ihn in die Zwischenablage, falls er nicht
 im Zielfeld gelandet ist.
 
-<p align="center"><img src="assets/screenshot.png" alt="Wispher-Fenster" width="320"></p>
+<p align="center"><img src="assets/ablauf.png" alt="Das Wispher-Fenster in drei Zuständen: Nimmt auf, Transkribiere, Bereit mit fertigem Text" width="900"></p>
 
 ## Schnellstart
 
